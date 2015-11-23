@@ -62,7 +62,7 @@ fi
 }
 
 if [ $# -lt 3 ]; then
-    echo "usage: $0 source identity -p provisioning [-e entitlements] [-r adjustBetaReports] [-d displayName] [-n version] -b bundleId outputIpa" >&2
+    echo "usage: $0 source identity -p provisioning [-e entitlements] [-r adjustBetaReports] [-d displayName] [-n version] [-t tmpdir] -b bundleId outputIpa" >&2
     echo "       -b is optional, but heavly recommended" >&2
     echo "       -r flag requires a value '-r yes'"
     echo "       -r flag is ignored if -e is also used" >&2
@@ -87,7 +87,7 @@ ADHOC_PROVISIONED_DEVICES=""
 
 # options start index
 OPTIND=3
-while getopts p:d:e:k:b:r:n: opt; do
+while getopts p:d:e:k:b:r:n:t: opt; do
 	case $opt in
 		p)
 			NEW_PROVISION="$OPTARG"
@@ -116,6 +116,10 @@ while getopts p:d:e:k:b:r:n: opt; do
 		r)
 			ADJUST_BETA_REPORTS_ACTIVE_FLAG="1"
 			echo "Enabled adjustment of beta-reports-active entitlements" >&2
+			;;
+		t)
+			TEMP_DIR="$OPTARG"
+			echo "Specified temporary directory use: '$TEMP_DIR'" >&2
 			;;
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
@@ -485,11 +489,11 @@ then
     # Zip all the contents, saving the zip file in the above directory
     # Navigate back to the orignating directory (sending the output to null)
     pushd "$TEMP_DIR" > /dev/null
-    zip -qr "../$TEMP_DIR.ipa" ./*
+    zip -qr "../_TEMP.ipa" ./*
     popd > /dev/null
 
     # Move the resulting ipa to the target destination
-    mv "$TEMP_DIR.ipa" "$NEW_FILE"
+    mv "$TEMP_DIR/../_TEMP.ipa" "$NEW_FILE"
 elif [ "${newextension}" = "app" ]
 then
     if [ -d $NEW_FILE ]; then
